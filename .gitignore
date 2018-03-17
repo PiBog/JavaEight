@@ -1,0 +1,12 @@
+# gitignore
+/.idea/
+/out/
+/lib/
+/web/
+jc.iml
+/src/*.xml
+/src/META-INF/
+/target/
+cdp.learn.java8.iml
+pom.xml
+README.txt
