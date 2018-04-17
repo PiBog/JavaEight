@@ -1,5 +1,6 @@
 package com.epam.cdp.m2.hw2.aggregator;
 
+import com.sun.istack.internal.NotNull;
 import javafx.util.Pair;
 import org.apache.log4j.Logger;
 
@@ -60,13 +61,7 @@ public class Java7Aggregator implements Aggregator {
     @Override
     public List<String> getDuplicates(List<String> words, long limit) {
 
-        long counter = 0;
-        Map<String, Integer> lenghtMap = new TreeMap<>();
-        logger.debug("Get sorted by Key treemap with frequency");
-        for (String word : words) {
-            if (!lenghtMap.containsKey(word.toUpperCase()) && !isReject(word))
-                lenghtMap.put(word.toUpperCase(), word.length());
-        }
+        Map<String, Integer> lenghtMap = getDuplicateMap(words);
         logger.debug("Convert Map to List of Map");
         List<Map.Entry<String, Integer>> entryList = new LinkedList<>(lenghtMap.entrySet());
         logger.debug("Sort list with Collections.sort(), provide a custom Comparator");
@@ -81,6 +76,7 @@ public class Java7Aggregator implements Aggregator {
         List<String> sortedList = new ArrayList<>();
 
         logger.debug("Loop the sorted list and put it into a new list with Pairs");
+        long counter = 0;
         for (Map.Entry<String, Integer> entry : entryList) {
             if (counter >= limit) break;
             counter++;
@@ -90,16 +86,17 @@ public class Java7Aggregator implements Aggregator {
         return sortedList;
     }
 
-    /**
-     * Check the word for compliance condition
-     *
-     * @param word - checked word
-     * @return <b>true</b> if word fail pass test
-     */
-    private boolean isReject(String word) {
-        boolean test = false;
-        if (word.length() < 2) test = true;
-        return test;
+    private Map<String, Integer> getDuplicateMap(@NotNull List<String> words) {
+        logger.debug("Create set of samples");
+        Set exeptionSamples  = new HashSet();
+        logger.debug("Create map for duplicates sorted by key");
+        Map<String, Integer> lenghtMap = new TreeMap<>();
+        logger.debug("Get sorted by keys treemap with frequency");
+        for (String word : words) {
+            if (!exeptionSamples.add(word.toUpperCase()))
+                lenghtMap.put(word.toUpperCase(), word.length());
+        }
+        return lenghtMap;
     }
 }
 
