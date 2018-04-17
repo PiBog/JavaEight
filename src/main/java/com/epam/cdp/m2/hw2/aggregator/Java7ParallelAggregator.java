@@ -2,12 +2,16 @@ package com.epam.cdp.m2.hw2.aggregator;
 
 import com.sun.istack.internal.NotNull;
 import javafx.util.Pair;
+import org.apache.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveTask;
 
 public class Java7ParallelAggregator implements Aggregator {
+
+    public static final Logger logger = Logger.getLogger(Java7ParallelAggregator.class.getName());
+
 
     static int numOfThreads = Runtime.getRuntime().availableProcessors();
 
@@ -17,10 +21,10 @@ public class Java7ParallelAggregator implements Aggregator {
     @Override
     public int sum(List<Integer> numbers) {
         int treshold = numbers.size() / numOfThreads;
-        //throw new UnsupportedOperationException();
+        logger.debug("Hi Jack");
 
         ForkJoinPool pool = new ForkJoinPool(numOfThreads);
-        System.out.println("" + numOfThreads + "->" + numbers.size() + "->" + treshold);
+        logger.info("" + numOfThreads + "->" + numbers.size() + "->" + treshold );
         return pool.invoke(new Myforks(numbers, treshold));
 
     }
@@ -40,32 +44,25 @@ public class Java7ParallelAggregator implements Aggregator {
         protected Integer compute() {
             if (list.isEmpty()) return 0;
             else if (length <= ((length < numOfThreads) ? numOfThreads : treshold)) {
-                System.out.println("----->" + treshold);
+                logger.info("Current threshold ->" + treshold);
                 int sum = 0;
                 for (int element : list) {
                     sum += element;
-                    System.out.println(element + "-" + length);
+                    logger.info(element + "-" + length);
                 }
-                System.out.println("--");
+                logger.info("End of cicle");
                 return sum;
             } else {
                 int mid = list.size() / 2;
                 List<Integer> firstList = list.subList(0, mid);
-                for (int a : firstList) {
-                    System.out.println(a);
-                }
-                System.out.println(firstList.size() + "-->" + treshold);
+                logger.info("" + firstList.size() + "/" + treshold);
 
                 Myforks f1 = new Myforks(firstList, treshold);
                 f1.fork();
 
-
                 List<Integer> secList = list.subList(mid, length);
-//                secList.add(list.get(length-1));
-                for (int a : secList) {
-                    System.out.println(a);
-                }
-                System.out.println(firstList.size() + "-->" + treshold);
+
+                logger.info("" + firstList.size() + "/" + treshold);
 
                 Myforks f2 = new Myforks(secList, treshold);
                 int compVal = f2.compute();
@@ -75,8 +72,6 @@ public class Java7ParallelAggregator implements Aggregator {
         }
     }
 
-//    --------------------------------------------------------------------------------------
-
     /**
      * {@inheritDoc}
      */
@@ -85,7 +80,7 @@ public class Java7ParallelAggregator implements Aggregator {
 
         long counter = 0;
 
-        //  Divide, sort, and merge to entryList
+        logger.debug("Divide, sort, and merge to entryList");
         ForkJoinPool pool = new ForkJoinPool(numOfThreads);
         Map<String, Long> entryMap = pool.invoke(new PairFork(words, words.size() / numOfThreads));
 
@@ -98,7 +93,7 @@ public class Java7ParallelAggregator implements Aggregator {
             }
         });
 
-        //  Loop the sorted list and put it into a new list with Pairs
+        logger.debug("  Loop the sorted list and put it into a new list with Pairs");
         List<Pair<String, Long>> sortedList = new ArrayList<>();
         for (Map.Entry<String, Long> entry : entryList) {
             if (counter >= limit) break;
@@ -112,12 +107,11 @@ public class Java7ParallelAggregator implements Aggregator {
 
     class PairFork extends RecursiveTask<Map<String, Long>> {
 
-        // initialize variebles;
+//        logger.debug(" initialize variebles");
         private List<String> forkList, sortedList;
         private int threshold;
         private int size;
 
-//
 
         public PairFork(List<String> forkList, int threshold) {
             this.forkList = forkList;
@@ -129,7 +123,7 @@ public class Java7ParallelAggregator implements Aggregator {
         protected Map<String, Long> compute() {
             if (size <= ((size < numOfThreads) ? numOfThreads : threshold)) {
                 Map<String, Long> freqMap = new TreeMap<>();
-                // Get sorted by Key treemap with frequency
+                logger.debug(" Get sorted by Key treemap with frequency");
                 for (String word : forkList) {
                     freqMap.put(word, freqMap.containsKey(word) ? freqMap.get(word) + 1 : 1);
                 }
@@ -161,7 +155,6 @@ public class Java7ParallelAggregator implements Aggregator {
 
     }
 
-//    --------------------------------------------------------------------------------------
 
     /**
      * {@inheritDoc}
@@ -170,7 +163,7 @@ public class Java7ParallelAggregator implements Aggregator {
     public List<String> getDuplicates(List<String> words, long limit) {
         long counter = 0;
 
-        //  Divide, sort, and merge to entryList
+        logger.debug("  Divide, sort, and merge to entryList");
         ForkJoinPool poolp = new ForkJoinPool(numOfThreads);
         Map<String, Long> entryMap = poolp.invoke(new DupFork(words, words.size() / numOfThreads));
 
@@ -183,7 +176,7 @@ public class Java7ParallelAggregator implements Aggregator {
             }
         });
 
-        //  Loop the sorted list and put it into a new list with Pairs
+        logger.debug("  Loop the sorted list and put it into a new list with Pairs");
         List<String> sortedList = new ArrayList<>();
         for (Map.Entry<String, Long> entry : entryList) {
             if (counter >= limit) break;
@@ -198,12 +191,12 @@ public class Java7ParallelAggregator implements Aggregator {
 
     class DupFork extends RecursiveTask<Map<String, Long>> {
 
-        // initialize variebles;
+//        logger.debug("initialize variebles");
         private List<String> forkList, sortedList;
         private int threshold;
         private int size;
 
-//
+
 
         public DupFork(List<String> forkList, int threshold) {
             this.forkList = forkList;
@@ -242,7 +235,7 @@ public class Java7ParallelAggregator implements Aggregator {
         private Map<String, Long> mergeTree(Map<String, Long> mapOne, Map<String, Long> mapTwo) {
             Map<String, Long> mergeMap = (isShorter(mapOne, mapTwo)) ? mapTwo : mapOne;
             Map<String, Long> shorter = (isShorter(mapOne, mapTwo)) ? mapOne : mapTwo;
-            for (Map.Entry<String, Long> entry : shorter.entrySet()) {  //Можна додати перевірку на наявність!?!
+            for (Map.Entry<String, Long> entry : shorter.entrySet()) {
                 mergeMap.put(entry.getKey(), entry.getValue());
             }
             return mergeMap;

@@ -1,4 +1,5 @@
 # gitignore
+/.Log/
 /.idea/
 /out/
 /lib/
