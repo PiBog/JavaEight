@@ -86,7 +86,7 @@ public class Java7Aggregator implements Aggregator {
         return sortedList;
     }
 
-    private Map<String, Integer> getDuplicateMap(@NotNull List<String> words) {
+    private static Map<String, Integer> getDuplicateMap(@NotNull List<String> words) {
         logger.debug("Create set of samples");
         Set exeptionSamples  = new HashSet();
         logger.debug("Create map for duplicates sorted by key");
