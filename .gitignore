@@ -9,5 +9,5 @@ jc.iml
 /src/META-INF/
 /target/
 cdp.learn.java8.iml
-pom.xml
-README.txt
+#pom.xml
+#README.txt
