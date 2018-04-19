@@ -207,13 +207,13 @@ public class Java7ParallelAggregator implements Aggregator {
         protected Map<String, Long> compute() {
             final Map<String, Long> resultMap;
             if (size <= ((size < numOfThreads) ? numOfThreads : threshold)) {
-                Map<String, Long> freqMap = new TreeMap<>();
-                for (String word : forkList) {
-                    if (isGood(word.toUpperCase()) && !freqMap.containsKey(word.toUpperCase())) {
-                        freqMap.put(word.toUpperCase(), (long) word.length());
-                    }
-                }
-                resultMap = freqMap;
+//                Map<String, Long> freqMap = new TreeMap<>();
+//                for (String word : forkList) {
+//                    if (isGood(word.toUpperCase()) && !freqMap.containsKey(word.toUpperCase())) {
+//                        freqMap.put(word.toUpperCase(), (long) word.length());
+//                    }
+//                }
+                resultMap = getDuplicateMap(forkList);
             } else {
                 int mid = size / 2;
                 DupFork pf1 = new DupFork(forkList.subList(0, mid), threshold);
@@ -256,15 +256,15 @@ public class Java7ParallelAggregator implements Aggregator {
          * @return <b>true</b> if word pass checking
          */
 
-        private static Map<String, Integer> getDuplicateMap(@NotNull final List<String> words) {
+        private Map<String, Long> getDuplicateMap(@NotNull final List<String> words) {
             logger.debug("Create set of samples");
             Set exeptionSamples  = new HashSet();
             logger.debug("Create map for duplicates sorted by key");
-            Map<String, Integer> lenghtMap = new TreeMap<>();
+            Map<String, Long> lenghtMap = new TreeMap<>();
             logger.debug("Get sorted by keys treemap with frequency");
             for (String word : words) {
                 if (!exeptionSamples.add(word.toUpperCase()))
-                    lenghtMap.put(word.toUpperCase(), word.length());
+                    lenghtMap.put(word.toUpperCase(), Integer.toUnsignedLong(word.length()));
             }
             return lenghtMap;
         }
