@@ -191,7 +191,6 @@ public class Java7ParallelAggregator implements Aggregator {
 
     class DupFork extends RecursiveTask<Map<String, Long>> {
 
-//        logger.debug("initialize variebles");
         private List<String> forkList, sortedList;
         private int threshold;
         private int size;
@@ -251,24 +250,23 @@ public class Java7ParallelAggregator implements Aggregator {
             return firstMap.size() < secondMap.size();
         }
 
-        /**Check the word for compliance condition.
+        /**Get the map with duplicated word for compliance condition.
          *
-         * @param word - checked word
+         * @param words - checked word
          * @return <b>true</b> if word pass checking
          */
-        private boolean isGood(String word) {
-            boolean test = false;
-            if (word.length() > 2) {
-                StringBuffer strBuf = new StringBuffer(word.toUpperCase());
-                char zeroChar = strBuf.charAt(0);
-                for (int i = 1; i < strBuf.length(); i++) {
-                    if (zeroChar != strBuf.charAt(i)) {
-                        test = true;
-                        break;
-                    }
-                }
+
+        private static Map<String, Integer> getDuplicateMap(@NotNull final List<String> words) {
+            logger.debug("Create set of samples");
+            Set exeptionSamples  = new HashSet();
+            logger.debug("Create map for duplicates sorted by key");
+            Map<String, Integer> lenghtMap = new TreeMap<>();
+            logger.debug("Get sorted by keys treemap with frequency");
+            for (String word : words) {
+                if (!exeptionSamples.add(word.toUpperCase()))
+                    lenghtMap.put(word.toUpperCase(), word.length());
             }
-            return test;
+            return lenghtMap;
         }
 
 
